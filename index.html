@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>BMI & Health Tracker</title>
+  <title>Advanced BMI Calculator</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
@@ -15,27 +15,26 @@
       padding: 0;
     }
     header {
-      padding: 1rem;
+      padding: 1rem 1rem 1rem 2rem;
       background: #fff;
-      text-align: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
     header h1 {
       font-size: 1.8rem;
       margin: 0;
-      animation: slideFade 1s ease-in-out;
       color: #007bff;
     }
     #signup-toggle {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      background: transparent;
-      border: none;
+      background: none;
+      border: 1px solid #007bff;
       color: #007bff;
+      padding: 6px 12px;
+      font-size: 0.9rem;
+      border-radius: 6px;
       cursor: pointer;
-      font-size: 0.95rem;
     }
     main {
       padding: 1.5rem 1rem;
@@ -126,9 +125,10 @@
 </head>
 <body>
   <header>
-    <h1>BMI & Lifestyle Health Tracker</h1>
+    <h1>Advanced BMI Calculator</h1>
     <button id="signup-toggle" onclick="toggleSignup()">👤 Signup (optional)</button>
   </header>
+
   <main>
     <div id="login-card" class="card hidden">
       <h3>Enter your name & email</h3>
@@ -145,7 +145,7 @@
       <button onclick="calculateBMI()">Calculate BMI</button>
     </div>
 
-    <div id="report">
+    <div id="report-area">
       <div id="bmi-result" class="card hidden"></div>
       <div id="bmi-chart" class="card hidden">
         <h4>BMI Category Chart:</h4>
@@ -305,7 +305,7 @@
     async function downloadPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
-      const element = document.getElementById("report");
+      const element = document.getElementById("report-area");
       const canvas = await html2canvas(element);
       const imgData = canvas.toDataURL("image/png");
       doc.addImage(imgData, "PNG", 10, 10, 190, 0);
@@ -313,7 +313,7 @@
     }
 
     async function downloadImage() {
-      const element = document.getElementById("report");
+      const element = document.getElementById("report-area");
       const canvas = await html2canvas(element);
       const link = document.createElement("a");
       link.download = "BMI_Report.png";
