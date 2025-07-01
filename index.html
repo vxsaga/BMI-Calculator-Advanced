@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>BMI & Health Checker</title>
+  <title>BMI & Health Tracker</title>
   <style>
     body {
       background: #f4f4f4;
@@ -13,7 +13,7 @@
       padding: 0;
     }
     header {
-      padding: 1rem 1rem 1.5rem;
+      padding: 1rem;
       background: #fff;
       text-align: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
@@ -24,13 +24,9 @@
       animation: slideFade 1s ease-in-out;
       color: #007bff;
     }
-    @keyframes slideFade {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
     main {
-      padding: 2rem 1rem;
-      max-width: 600px;
+      padding: 1.5rem 1rem;
+      max-width: 700px;
       margin: auto;
     }
     input, button {
@@ -56,11 +52,8 @@
       border-radius: 12px;
       margin-top: 20px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      animation: fadeIn 0.5s ease-in;
     }
-    .hidden {
-      display: none;
-    }
+    .hidden { display: none; }
     .bmi-bar {
       display: flex;
       height: 20px;
@@ -92,6 +85,22 @@
       gap: 10px;
       margin: 10px 0;
     }
+    .share-buttons button {
+      width: 49%;
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+    table {
+      width: 100%;
+      margin-top: 10px;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px;
+      text-align: center;
+    }
     footer {
       text-align: center;
       padding: 1rem;
@@ -104,14 +113,23 @@
 </head>
 <body>
   <header>
-    <h1>BMI & Lifestyle Health Checker</h1>
+    <h1>BMI & Lifestyle Health Tracker</h1>
   </header>
   <main>
-    <label>Height (in cm)</label>
-    <input type="number" id="height" placeholder="e.g. 170" />
-    <label>Weight (in kg)</label>
-    <input type="number" id="weight" placeholder="e.g. 70" />
-    <button onclick="calculateBMI()">Calculate BMI</button>
+    <div id="login-card" class="card">
+      <h3>Welcome! Please enter your name & email</h3>
+      <input type="text" id="userName" placeholder="Your Name" />
+      <input type="email" id="userEmail" placeholder="Email (for local storage only)" />
+      <button onclick="saveUser()">Continue</button>
+    </div>
+
+    <div id="bmi-form" class="card hidden">
+      <label>Height (in cm)</label>
+      <input type="number" id="height" placeholder="e.g. 170" />
+      <label>Weight (in kg)</label>
+      <input type="number" id="weight" placeholder="e.g. 70" />
+      <button onclick="calculateBMI()">Calculate BMI</button>
+    </div>
 
     <div id="bmi-result" class="card hidden"></div>
     <div id="bmi-chart" class="card hidden">
@@ -132,8 +150,12 @@
       <p id="mascot-msg" style="text-align:center;"></p>
     </div>
 
-    <div id="test-suggestions" class="card hidden"></div>
+    <div id="share-buttons" class="card hidden share-buttons">
+      <button onclick="shareBMI('whatsapp')">Share via WhatsApp</button>
+      <button onclick="shareBMI('telegram')">Share via Telegram</button>
+    </div>
 
+    <div id="test-suggestions" class="card hidden"></div>
     <div id="disease-check" class="card hidden">
       <p><strong>Do you have any of the following lifestyle diseases?</strong></p>
       <div class="checkbox-group">
@@ -147,87 +169,116 @@
     </div>
 
     <div id="recommendations" class="card hidden"></div>
+    <div id="history" class="card hidden">
+      <h4>Your BMI History</h4>
+      <table id="bmiTable"><tr><th>Date</th><th>BMI</th><th>Category</th></tr></table>
+      <button onclick="resetHistory()">Clear History</button>
+    </div>
   </main>
 
   <footer>
-    Built by <a href="https://github.com/vxsaga" target="_blank">vxsaga</a> · 100% Free Health Tool
+    Built by <a href="https://github.com/vxsaga" target="_blank">vxsaga</a> · Health Tracker
   </footer>
 
   <script>
+    let user = JSON.parse(localStorage.getItem("bmiUser")) || null;
+    if (user) {
+      document.getElementById("login-card").classList.add("hidden");
+      document.getElementById("bmi-form").classList.remove("hidden");
+      showHistory();
+    }
+
+    function saveUser() {
+      const name = document.getElementById("userName").value;
+      const email = document.getElementById("userEmail").value;
+      if (!name || !email) return alert("Enter name and email");
+      user = { name, email };
+      localStorage.setItem("bmiUser", JSON.stringify(user));
+      document.getElementById("login-card").classList.add("hidden");
+      document.getElementById("bmi-form").classList.remove("hidden");
+      showHistory();
+    }
+
     function calculateBMI() {
       const h = parseFloat(document.getElementById("height").value);
       const w = parseFloat(document.getElementById("weight").value);
-      if (!h || !w) {
-        alert("Please enter valid height and weight");
-        return;
-      }
-      const heightInM = h / 100;
-      const bmi = (w / (heightInM * heightInM)).toFixed(1);
+      if (!h || !w) return alert("Enter valid height & weight");
+      const bmi = (w / ((h / 100) ** 2)).toFixed(1);
       let category = "", mascot = "", msg = "", percent = 0;
 
-      if (bmi < 18.5) {
-        category = "Underweight"; mascot = "😟"; msg = "You're underweight. Focus on nutrition."; percent = 7;
-      } else if (bmi < 24.9) {
-        category = "Normal"; mascot = "😊"; msg = "Great! Your BMI is in the healthy range."; percent = 25;
-      } else if (bmi < 29.9) {
-        category = "Overweight"; mascot = "😐"; msg = "Slightly high. Add more activity to your routine."; percent = 60;
-      } else {
-        category = "Obese"; mascot = "😟"; msg = "Please take steps to reduce your weight safely."; percent = 87;
-      }
+      if (bmi < 18.5) { category = "Underweight"; mascot = "😟"; msg = "You're underweight. Eat well."; percent = 7; }
+      else if (bmi < 24.9) { category = "Normal"; mascot = "😊"; msg = "Great job! Keep it up."; percent = 25; }
+      else if (bmi < 29.9) { category = "Overweight"; mascot = "😐"; msg = "Try to be more active."; percent = 60; }
+      else { category = "Obese"; mascot = "😟"; msg = "Start making small changes."; percent = 87; }
 
       document.getElementById("bmi-result").classList.remove("hidden");
-      document.getElementById("bmi-result").innerHTML =
-        `<h3>Your BMI is ${bmi}</h3><p>Category: <strong>${category}</strong></p>`;
-
+      document.getElementById("bmi-result").innerHTML = `<h3>Your BMI is ${bmi}</h3><p>Category: <strong>${category}</strong></p>`;
       document.getElementById("bmi-chart").classList.remove("hidden");
       document.getElementById("marker").style.left = `${percent}%`;
-
       document.getElementById("mascot-box").classList.remove("hidden");
       document.getElementById("mascot").innerText = mascot;
       document.getElementById("mascot-msg").innerText = msg;
+      document.getElementById("share-buttons").classList.remove("hidden");
 
-      document.getElementById("test-suggestions").classList.add("hidden");
-      document.getElementById("disease-check").classList.add("hidden");
-      document.getElementById("recommendations").classList.add("hidden");
+      saveBMIToHistory(bmi, category);
 
       if (bmi > 24.9) {
         document.getElementById("test-suggestions").classList.remove("hidden");
         document.getElementById("test-suggestions").innerHTML = `
-          <h4>Recommended Tests:</h4>
-          <ul>
-            <li>Fasting Blood Sugar</li>
-            <li>HbA1c</li>
-            <li>Lipid Profile</li>
-            <li>Liver Function Test (LFT)</li>
-            <li>Thyroid Profile</li>
-          </ul>`;
+          <h4>Suggested Tests:</h4>
+          <ul><li>Blood Sugar, HbA1c</li><li>Lipid Profile</li><li>Liver Function</li><li>Thyroid Profile</li></ul>`;
         document.getElementById("disease-check").classList.remove("hidden");
       } else if (bmi < 18.5) {
         document.getElementById("test-suggestions").classList.remove("hidden");
         document.getElementById("test-suggestions").innerHTML = `
-          <h4>Underweight - Suggested Investigations:</h4>
-          <ul>
-            <li>Vitamin D & B12</li>
-            <li>Iron, Ferritin</li>
-            <li>Thyroid Profile</li>
-            <li>Liver/Kidney Function Tests</li>
-            <li>CBC (Complete Blood Count)</li>
-          </ul>
-          <p><strong>Tips:</strong> Eat frequent, protein-rich meals. Use nutrition drinks or supplements if needed.</p>`;
+          <h4>Suggested Tests:</h4>
+          <ul><li>Iron, Vitamin D/B12</li><li>Thyroid, CBC</li><li>Liver/Kidney Function</li></ul>
+          <p>Eat more protein & consider supplements.</p>`;
+      } else {
+        document.getElementById("test-suggestions").classList.add("hidden");
+        document.getElementById("disease-check").classList.add("hidden");
+      }
+    }
+
+    function shareBMI(platform) {
+      const result = document.getElementById("bmi-result").innerText;
+      const msg = encodeURIComponent(`${result}\nCheck your BMI: https://vxsaga.github.io/BMI-Calculator-Advanced/`);
+      if (platform === "whatsapp") {
+        window.open(`https://wa.me/?text=${msg}`, "_blank");
+      } else {
+        window.open(`https://t.me/share/url?url=https://vxsaga.github.io/BMI-Calculator-Advanced/&text=${msg}`, "_blank");
       }
     }
 
     function showRecommendations() {
       document.getElementById("recommendations").classList.remove("hidden");
       document.getElementById("recommendations").innerHTML = `
-        <h4>Lifestyle Improvement Tips:</h4>
-        <ul>
-          <li>Walk 30–45 minutes daily</li>
-          <li>Avoid refined sugar, maida, and fried food</li>
-          <li>Eat high-fiber veggies and whole grains</li>
-          <li>Improve sleep and manage stress (meditation helps)</li>
-          <li>Do periodic checkups every 3–6 months</li>
-        </ul>`;
+        <h4>Tips to Improve:</h4>
+        <ul><li>Walk daily 30+ mins</li><li>Sleep 7+ hours</li><li>Avoid fried & sugary food</li><li>Eat more veggies & fiber</li></ul>`;
+    }
+
+    function saveBMIToHistory(bmi, category) {
+      let history = JSON.parse(localStorage.getItem("bmiHistory")) || [];
+      history.push({ date: new Date().toLocaleDateString(), bmi, category });
+      localStorage.setItem("bmiHistory", JSON.stringify(history));
+      showHistory();
+    }
+
+    function showHistory() {
+      const history = JSON.parse(localStorage.getItem("bmiHistory")) || [];
+      const table = document.getElementById("bmiTable");
+      table.innerHTML = "<tr><th>Date</th><th>BMI</th><th>Category</th></tr>";
+      history.forEach(entry => {
+        table.innerHTML += `<tr><td>${entry.date}</td><td>${entry.bmi}</td><td>${entry.category}</td></tr>`;
+      });
+      if (history.length > 0) document.getElementById("history").classList.remove("hidden");
+    }
+
+    function resetHistory() {
+      if (confirm("Clear your BMI history?")) {
+        localStorage.removeItem("bmiHistory");
+        showHistory();
+      }
     }
   </script>
 </body>
