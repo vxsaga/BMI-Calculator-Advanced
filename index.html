@@ -33,24 +33,19 @@
       max-width: 600px;
       margin: auto;
     }
-    input {
+    input, button {
       width: 100%;
       padding: 10px;
-      margin-top: 8px;
-      margin-bottom: 16px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
       font-size: 1rem;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
     }
     button {
-      padding: 10px 20px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 8px;
       background: #007bff;
       color: #fff;
+      border: none;
       cursor: pointer;
-      transition: background 0.3s;
     }
     button:hover {
       background: #0056b3;
@@ -71,16 +66,16 @@
       height: 20px;
       border-radius: 10px;
       overflow: hidden;
-      margin-top: 12px;
     }
-    .bmi-bar div {
-      flex-grow: 1;
-      height: 100%;
+    .bmi-bar div { flex-grow: 1; height: 100%; }
+    .uw { background: #00bfff; }
+    .n  { background: #28a745; }
+    .ow { background: #ffc107; }
+    .ob { background: #dc3545; }
+    .bar-wrapper {
+      position: relative;
+      margin-top: 10px;
     }
-    .uw { background: #00bfff; }    /* Underweight */
-    .n  { background: #28a745; }     /* Normal */
-    .ow { background: #ffc107; }     /* Overweight */
-    .ob { background: #dc3545; }     /* Obese */
     .marker {
       width: 20px;
       height: 20px;
@@ -90,14 +85,12 @@
       top: -5px;
       transition: left 0.5s ease;
     }
-    .bar-wrapper {
-      position: relative;
-      margin-top: 10px;
-    }
-    .mascot {
-      font-size: 3rem;
-      text-align: center;
-      margin-top: 10px;
+    .mascot { font-size: 3rem; text-align: center; margin: 10px 0; }
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 10px 0;
     }
     footer {
       text-align: center;
@@ -116,20 +109,17 @@
   <main>
     <label>Height (in cm)</label>
     <input type="number" id="height" placeholder="e.g. 170" />
-
     <label>Weight (in kg)</label>
     <input type="number" id="weight" placeholder="e.g. 70" />
-
     <button onclick="calculateBMI()">Calculate BMI</button>
 
     <div id="bmi-result" class="card hidden"></div>
-
     <div id="bmi-chart" class="card hidden">
       <h4>BMI Category Chart:</h4>
       <div class="bar-wrapper">
         <div class="bmi-bar">
           <div class="uw" style="width:15%"></div>
-          <div class="n" style="width:35%"></div>
+          <div class="n"  style="width:35%"></div>
           <div class="ow" style="width:25%"></div>
           <div class="ob" style="width:25%"></div>
         </div>
@@ -139,10 +129,24 @@
 
     <div id="mascot-box" class="card hidden">
       <div class="mascot" id="mascot">🙂</div>
-      <p id="mascot-msg" style="text-align:center; margin-top: 0;"></p>
+      <p id="mascot-msg" style="text-align:center;"></p>
     </div>
 
-    <!-- Optional: you can include other cards like lifestyle or test-suggestions here -->
+    <div id="test-suggestions" class="card hidden"></div>
+
+    <div id="disease-check" class="card hidden">
+      <p><strong>Do you have any of the following lifestyle diseases?</strong></p>
+      <div class="checkbox-group">
+        <label><input type="checkbox" value="Diabetes" /> Diabetes</label>
+        <label><input type="checkbox" value="Hypertension" /> Hypertension</label>
+        <label><input type="checkbox" value="Fatty Liver" /> Fatty Liver</label>
+        <label><input type="checkbox" value="Thyroid" /> Thyroid</label>
+      </div>
+      <p><strong>Are they under control?</strong></p>
+      <button onclick="showRecommendations()">I Need Help</button>
+    </div>
+
+    <div id="recommendations" class="card hidden"></div>
   </main>
 
   <footer>
@@ -162,39 +166,68 @@
       let category = "", mascot = "", msg = "", percent = 0;
 
       if (bmi < 18.5) {
-        category = "Underweight";
-        mascot = "😟";
-        msg = "You're underweight. Focus on nutrition.";
-        percent = 7;
+        category = "Underweight"; mascot = "😟"; msg = "You're underweight. Focus on nutrition."; percent = 7;
       } else if (bmi < 24.9) {
-        category = "Normal";
-        mascot = "😊";
-        msg = "Great! Your BMI is in the healthy range.";
-        percent = 25;
+        category = "Normal"; mascot = "😊"; msg = "Great! Your BMI is in the healthy range."; percent = 25;
       } else if (bmi < 29.9) {
-        category = "Overweight";
-        mascot = "😐";
-        msg = "A little high. Add more activity to your routine.";
-        percent = 60;
+        category = "Overweight"; mascot = "😐"; msg = "Slightly high. Add more activity to your routine."; percent = 60;
       } else {
-        category = "Obese";
-        mascot = "😟";
-        msg = "Please take steps to reduce your weight safely.";
-        percent = 87;
+        category = "Obese"; mascot = "😟"; msg = "Please take steps to reduce your weight safely."; percent = 87;
       }
 
       document.getElementById("bmi-result").classList.remove("hidden");
       document.getElementById("bmi-result").innerHTML =
         `<h3>Your BMI is ${bmi}</h3><p>Category: <strong>${category}</strong></p>`;
 
-      // Show chart + marker
       document.getElementById("bmi-chart").classList.remove("hidden");
       document.getElementById("marker").style.left = `${percent}%`;
 
-      // Mascot section
       document.getElementById("mascot-box").classList.remove("hidden");
       document.getElementById("mascot").innerText = mascot;
       document.getElementById("mascot-msg").innerText = msg;
+
+      document.getElementById("test-suggestions").classList.add("hidden");
+      document.getElementById("disease-check").classList.add("hidden");
+      document.getElementById("recommendations").classList.add("hidden");
+
+      if (bmi > 24.9) {
+        document.getElementById("test-suggestions").classList.remove("hidden");
+        document.getElementById("test-suggestions").innerHTML = `
+          <h4>Recommended Tests:</h4>
+          <ul>
+            <li>Fasting Blood Sugar</li>
+            <li>HbA1c</li>
+            <li>Lipid Profile</li>
+            <li>Liver Function Test (LFT)</li>
+            <li>Thyroid Profile</li>
+          </ul>`;
+        document.getElementById("disease-check").classList.remove("hidden");
+      } else if (bmi < 18.5) {
+        document.getElementById("test-suggestions").classList.remove("hidden");
+        document.getElementById("test-suggestions").innerHTML = `
+          <h4>Underweight - Suggested Investigations:</h4>
+          <ul>
+            <li>Vitamin D & B12</li>
+            <li>Iron, Ferritin</li>
+            <li>Thyroid Profile</li>
+            <li>Liver/Kidney Function Tests</li>
+            <li>CBC (Complete Blood Count)</li>
+          </ul>
+          <p><strong>Tips:</strong> Eat frequent, protein-rich meals. Use nutrition drinks or supplements if needed.</p>`;
+      }
+    }
+
+    function showRecommendations() {
+      document.getElementById("recommendations").classList.remove("hidden");
+      document.getElementById("recommendations").innerHTML = `
+        <h4>Lifestyle Improvement Tips:</h4>
+        <ul>
+          <li>Walk 30–45 minutes daily</li>
+          <li>Avoid refined sugar, maida, and fried food</li>
+          <li>Eat high-fiber veggies and whole grains</li>
+          <li>Improve sleep and manage stress (meditation helps)</li>
+          <li>Do periodic checkups every 3–6 months</li>
+        </ul>`;
     }
   </script>
 </body>
