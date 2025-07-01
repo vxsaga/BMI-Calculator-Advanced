@@ -25,14 +25,8 @@
       color: #007bff;
     }
     @keyframes slideFade {
-      from {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     main {
       padding: 2rem 1rem;
@@ -69,24 +63,41 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       animation: fadeIn 0.5s ease-in;
     }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
     .hidden {
       display: none;
     }
-    label {
-      font-weight: bold;
-    }
-    .checkbox-group {
+    .bmi-bar {
       display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin: 10px 0;
+      height: 20px;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 12px;
     }
-    .checkbox-group label {
-      font-weight: normal;
+    .bmi-bar div {
+      flex-grow: 1;
+      height: 100%;
+    }
+    .uw { background: #00bfff; }    /* Underweight */
+    .n  { background: #28a745; }     /* Normal */
+    .ow { background: #ffc107; }     /* Overweight */
+    .ob { background: #dc3545; }     /* Obese */
+    .marker {
+      width: 20px;
+      height: 20px;
+      background: #222;
+      border-radius: 50%;
+      position: absolute;
+      top: -5px;
+      transition: left 0.5s ease;
+    }
+    .bar-wrapper {
+      position: relative;
+      margin-top: 10px;
+    }
+    .mascot {
+      font-size: 3rem;
+      text-align: center;
+      margin-top: 10px;
     }
     footer {
       text-align: center;
@@ -112,21 +123,26 @@
     <button onclick="calculateBMI()">Calculate BMI</button>
 
     <div id="bmi-result" class="card hidden"></div>
-    <div id="test-suggestions" class="card hidden"></div>
-    <div id="disease-check" class="card hidden">
-      <p>Do you have any of the following lifestyle diseases?</p>
-      <div class="checkbox-group">
-        <label><input type="checkbox" value="Diabetes" /> Diabetes</label>
-        <label><input type="checkbox" value="Hypertension" /> Hypertension</label>
-        <label><input type="checkbox" value="Fatty Liver" /> Fatty Liver</label>
-        <label><input type="checkbox" value="Thyroid" /> Thyroid</label>
+
+    <div id="bmi-chart" class="card hidden">
+      <h4>BMI Category Chart:</h4>
+      <div class="bar-wrapper">
+        <div class="bmi-bar">
+          <div class="uw" style="width:15%"></div>
+          <div class="n" style="width:35%"></div>
+          <div class="ow" style="width:25%"></div>
+          <div class="ob" style="width:25%"></div>
+        </div>
+        <div id="marker" class="marker" style="left:0%"></div>
       </div>
-      <p>Are you able to manage them well?</p>
-      <button onclick="showRecommendations()">I Need Help</button>
     </div>
 
-    <div id="underweight-recommendations" class="card hidden"></div>
-    <div id="recommendations" class="card hidden"></div>
+    <div id="mascot-box" class="card hidden">
+      <div class="mascot" id="mascot">🙂</div>
+      <p id="mascot-msg" style="text-align:center; margin-top: 0;"></p>
+    </div>
+
+    <!-- Optional: you can include other cards like lifestyle or test-suggestions here -->
   </main>
 
   <footer>
@@ -134,12 +150,6 @@
   </footer>
 
   <script>
-    const resultBox = document.getElementById("bmi-result");
-    const testBox = document.getElementById("test-suggestions");
-    const diseaseCheck = document.getElementById("disease-check");
-    const underweightBox = document.getElementById("underweight-recommendations");
-    const recBox = document.getElementById("recommendations");
-
     function calculateBMI() {
       const h = parseFloat(document.getElementById("height").value);
       const w = parseFloat(document.getElementById("weight").value);
@@ -149,73 +159,42 @@
       }
       const heightInM = h / 100;
       const bmi = (w / (heightInM * heightInM)).toFixed(1);
-      let category = "";
-      if (bmi < 18.5) category = "Underweight";
-      else if (bmi < 24.9) category = "Normal";
-      else if (bmi < 29.9) category = "Overweight";
-      else category = "Obese";
+      let category = "", mascot = "", msg = "", percent = 0;
 
-      resultBox.classList.remove("hidden");
-      resultBox.innerHTML = `<h3>Your BMI is ${bmi}</h3><p>Category: <strong>${category}</strong></p>`;
-
-      // Hide everything by default
-      testBox.classList.add("hidden");
-      diseaseCheck.classList.add("hidden");
-      recBox.classList.add("hidden");
-      underweightBox.classList.add("hidden");
-
-      if (bmi > 24.9) {
-        testBox.classList.remove("hidden");
-        testBox.innerHTML = `
-          <h4>Recommended Health Checkups:</h4>
-          <ul>
-            <li>Fasting Blood Sugar</li>
-            <li>HbA1c</li>
-            <li>Lipid Profile</li>
-            <li>Liver Function Test (LFT)</li>
-            <li>Thyroid Function Test</li>
-          </ul>`;
-        diseaseCheck.classList.remove("hidden");
-      } else if (bmi < 18.5) {
-        underweightBox.classList.remove("hidden");
-        underweightBox.innerHTML = `
-          <h4>You're Underweight – Here's What You Should Know:</h4>
-          <p><strong>Possible Causes:</strong></p>
-          <ul>
-            <li>Poor nutrition or skipped meals</li>
-            <li>Hyperthyroidism</li>
-            <li>Digestive disorders or malabsorption</li>
-            <li>Stress or anxiety-related weight loss</li>
-          </ul>
-          <p><strong>Recommended Blood Tests:</strong></p>
-          <ul>
-            <li>CBC (Complete Blood Count)</li>
-            <li>Vitamin B12 & D levels</li>
-            <li>Thyroid Profile (T3, T4, TSH)</li>
-            <li>Iron & Ferritin Levels</li>
-            <li>Liver and Kidney Function Tests</li>
-          </ul>
-          <p><strong>What You Can Do:</strong></p>
-          <ul>
-            <li>Eat more calorie-dense but healthy foods (nuts, avocados, eggs)</li>
-            <li>Use protein powders or nutritional supplements (e.g. Ensure, Pediasure)</li>
-            <li>Eat small frequent meals</li>
-            <li>Manage stress and improve sleep</li>
-          </ul>`;
+      if (bmi < 18.5) {
+        category = "Underweight";
+        mascot = "😟";
+        msg = "You're underweight. Focus on nutrition.";
+        percent = 7;
+      } else if (bmi < 24.9) {
+        category = "Normal";
+        mascot = "😊";
+        msg = "Great! Your BMI is in the healthy range.";
+        percent = 25;
+      } else if (bmi < 29.9) {
+        category = "Overweight";
+        mascot = "😐";
+        msg = "A little high. Add more activity to your routine.";
+        percent = 60;
+      } else {
+        category = "Obese";
+        mascot = "😟";
+        msg = "Please take steps to reduce your weight safely.";
+        percent = 87;
       }
-    }
 
-    function showRecommendations() {
-      recBox.classList.remove("hidden");
-      recBox.innerHTML = `
-        <h4>Recommended Lifestyle Modifications:</h4>
-        <ul>
-          <li>Eat more fiber-rich vegetables & whole grains</li>
-          <li>Avoid processed sugar and refined carbs</li>
-          <li>Walk at least 30 minutes daily</li>
-          <li>Reduce screen time and improve sleep hygiene</li>
-          <li>Practice stress-reduction: yoga, meditation, journaling</li>
-        </ul>`;
+      document.getElementById("bmi-result").classList.remove("hidden");
+      document.getElementById("bmi-result").innerHTML =
+        `<h3>Your BMI is ${bmi}</h3><p>Category: <strong>${category}</strong></p>`;
+
+      // Show chart + marker
+      document.getElementById("bmi-chart").classList.remove("hidden");
+      document.getElementById("marker").style.left = `${percent}%`;
+
+      // Mascot section
+      document.getElementById("mascot-box").classList.remove("hidden");
+      document.getElementById("mascot").innerText = mascot;
+      document.getElementById("mascot-msg").innerText = msg;
     }
   </script>
 </body>
