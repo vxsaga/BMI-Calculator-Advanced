@@ -1,2 +1,171 @@
-# BMI-Calculator-Advanced
-BMI Advanced Calculator
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BMI & Health Checker</title>
+  <style>
+    body {
+      background: #f4f4f4;
+      color: #222;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      padding: 1rem;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.4rem;
+    }
+    main {
+      padding: 2rem 1rem;
+      max-width: 600px;
+      margin: auto;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      margin-bottom: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background: #007bff;
+      color: #fff;
+      cursor: pointer;
+    }
+    .card {
+      background: #fff;
+      padding: 1rem;
+      border-radius: 12px;
+      margin-top: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .hidden {
+      display: none;
+    }
+    label {
+      font-weight: bold;
+    }
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .checkbox-group label {
+      font-weight: normal;
+    }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+      background: #fff;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>BMI & Lifestyle Health Checker</h1>
+  </header>
+  <main>
+    <label>Height (in cm)</label>
+    <input type="number" id="height" placeholder="e.g. 170" />
+
+    <label>Weight (in kg)</label>
+    <input type="number" id="weight" placeholder="e.g. 70" />
+
+    <button onclick="calculateBMI()">Calculate BMI</button>
+
+    <div id="bmi-result" class="card hidden"></div>
+    <div id="test-suggestions" class="card hidden"></div>
+    <div id="disease-check" class="card hidden">
+      <p>Do you have any of the following lifestyle diseases?</p>
+      <div class="checkbox-group">
+        <label><input type="checkbox" value="Diabetes" /> Diabetes</label>
+        <label><input type="checkbox" value="Hypertension" /> Hypertension</label>
+        <label><input type="checkbox" value="Fatty Liver" /> Fatty Liver</label>
+        <label><input type="checkbox" value="Thyroid" /> Thyroid</label>
+      </div>
+      <p>Are you able to manage them well?</p>
+      <button onclick="showRecommendations()">I Need Help</button>
+    </div>
+
+    <div id="recommendations" class="card hidden"></div>
+  </main>
+
+  <footer>
+    Built by <a href="https://github.com/vxsaga">vxsaga</a> · 100% Free Health Tool
+  </footer>
+
+  <script>
+    const resultBox = document.getElementById("bmi-result");
+    const testBox = document.getElementById("test-suggestions");
+    const diseaseCheck = document.getElementById("disease-check");
+    const recBox = document.getElementById("recommendations");
+
+    function calculateBMI() {
+      const h = parseFloat(document.getElementById("height").value);
+      const w = parseFloat(document.getElementById("weight").value);
+      if (!h || !w) {
+        alert("Please enter valid height and weight");
+        return;
+      }
+      const heightInM = h / 100;
+      const bmi = (w / (heightInM * heightInM)).toFixed(1);
+      let category = "";
+      if (bmi < 18.5) category = "Underweight";
+      else if (bmi < 24.9) category = "Normal";
+      else if (bmi < 29.9) category = "Overweight";
+      else category = "Obese";
+
+      resultBox.classList.remove("hidden");
+      resultBox.innerHTML = `<h3>Your BMI is ${bmi}</h3><p>Category: <strong>${category}</strong></p>`;
+
+      if (bmi > 24.9) {
+        testBox.classList.remove("hidden");
+        testBox.innerHTML = `
+          <h4>Recommended Health Checkups:</h4>
+          <ul>
+            <li>Fasting Blood Sugar</li>
+            <li>HbA1c</li>
+            <li>Lipid Profile</li>
+            <li>Liver Function Test (LFT)</li>
+            <li>Thyroid Function Test</li>
+          </ul>`;
+        diseaseCheck.classList.remove("hidden");
+      } else {
+        testBox.classList.add("hidden");
+        diseaseCheck.classList.add("hidden");
+        recBox.classList.add("hidden");
+      }
+    }
+
+    function showRecommendations() {
+      recBox.classList.remove("hidden");
+      recBox.innerHTML = `
+        <h4>Recommended Lifestyle Modifications:</h4>
+        <ul>
+          <li>Eat more fiber-rich vegetables & whole grains</li>
+          <li>Avoid processed sugar and refined carbs</li>
+          <li>Walk at least 30 minutes daily</li>
+          <li>Reduce screen time and improve sleep hygiene</li>
+          <li>Practice stress-reduction: yoga, meditation, journaling</li>
+        </ul>`;
+    }
+  </script>
+</body>
+</html>
+
