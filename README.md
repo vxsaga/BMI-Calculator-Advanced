@@ -125,6 +125,7 @@
       <button onclick="showRecommendations()">I Need Help</button>
     </div>
 
+    <div id="underweight-recommendations" class="card hidden"></div>
     <div id="recommendations" class="card hidden"></div>
   </main>
 
@@ -136,6 +137,7 @@
     const resultBox = document.getElementById("bmi-result");
     const testBox = document.getElementById("test-suggestions");
     const diseaseCheck = document.getElementById("disease-check");
+    const underweightBox = document.getElementById("underweight-recommendations");
     const recBox = document.getElementById("recommendations");
 
     function calculateBMI() {
@@ -156,6 +158,12 @@
       resultBox.classList.remove("hidden");
       resultBox.innerHTML = `<h3>Your BMI is ${bmi}</h3><p>Category: <strong>${category}</strong></p>`;
 
+      // Hide everything by default
+      testBox.classList.add("hidden");
+      diseaseCheck.classList.add("hidden");
+      recBox.classList.add("hidden");
+      underweightBox.classList.add("hidden");
+
       if (bmi > 24.9) {
         testBox.classList.remove("hidden");
         testBox.innerHTML = `
@@ -168,10 +176,32 @@
             <li>Thyroid Function Test</li>
           </ul>`;
         diseaseCheck.classList.remove("hidden");
-      } else {
-        testBox.classList.add("hidden");
-        diseaseCheck.classList.add("hidden");
-        recBox.classList.add("hidden");
+      } else if (bmi < 18.5) {
+        underweightBox.classList.remove("hidden");
+        underweightBox.innerHTML = `
+          <h4>You're Underweight – Here's What You Should Know:</h4>
+          <p><strong>Possible Causes:</strong></p>
+          <ul>
+            <li>Poor nutrition or skipped meals</li>
+            <li>Hyperthyroidism</li>
+            <li>Digestive disorders or malabsorption</li>
+            <li>Stress or anxiety-related weight loss</li>
+          </ul>
+          <p><strong>Recommended Blood Tests:</strong></p>
+          <ul>
+            <li>CBC (Complete Blood Count)</li>
+            <li>Vitamin B12 & D levels</li>
+            <li>Thyroid Profile (T3, T4, TSH)</li>
+            <li>Iron & Ferritin Levels</li>
+            <li>Liver and Kidney Function Tests</li>
+          </ul>
+          <p><strong>What You Can Do:</strong></p>
+          <ul>
+            <li>Eat more calorie-dense but healthy foods (nuts, avocados, eggs)</li>
+            <li>Use protein powders or nutritional supplements (e.g. Ensure, Pediasure)</li>
+            <li>Eat small frequent meals</li>
+            <li>Manage stress and improve sleep</li>
+          </ul>`;
       }
     }
 
