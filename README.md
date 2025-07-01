@@ -8,19 +8,31 @@
     body {
       background: #f4f4f4;
       color: #222;
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       margin: 0;
       padding: 0;
     }
     header {
-      padding: 1rem;
+      padding: 1rem 1rem 1.5rem;
       background: #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
     header h1 {
+      font-size: 1.8rem;
       margin: 0;
-      font-size: 1.4rem;
+      animation: slideFade 1s ease-in-out;
+      color: #007bff;
+    }
+    @keyframes slideFade {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
     main {
       padding: 2rem 1rem;
@@ -44,6 +56,10 @@
       background: #007bff;
       color: #fff;
       cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #0056b3;
     }
     .card {
       background: #fff;
@@ -51,6 +67,11 @@
       border-radius: 12px;
       margin-top: 20px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      animation: fadeIn 0.5s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
     }
     .hidden {
       display: none;
@@ -73,6 +94,7 @@
       font-size: 0.9rem;
       background: #fff;
       margin-top: 2rem;
+      color: #555;
     }
   </style>
 </head>
@@ -107,7 +129,7 @@
   </main>
 
   <footer>
-    Built by <a href="https://github.com/vxsaga">vxsaga</a> · 100% Free Health Tool
+    Built by <a href="https://github.com/vxsaga" target="_blank">vxsaga</a> · 100% Free Health Tool
   </footer>
 
   <script>
@@ -168,4 +190,3 @@
   </script>
 </body>
 </html>
-
