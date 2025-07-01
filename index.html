@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>BMI & Health Tracker</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     body {
       background: #f4f4f4;
@@ -17,12 +19,23 @@
       background: #fff;
       text-align: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      position: relative;
     }
     header h1 {
       font-size: 1.8rem;
       margin: 0;
       animation: slideFade 1s ease-in-out;
       color: #007bff;
+    }
+    #signup-toggle {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: transparent;
+      border: none;
+      color: #007bff;
+      cursor: pointer;
+      font-size: 0.95rem;
     }
     main {
       padding: 1.5rem 1rem;
@@ -85,7 +98,7 @@
       gap: 10px;
       margin: 10px 0;
     }
-    .share-buttons button {
+    .share-buttons button, .export-buttons button {
       width: 49%;
       margin-top: 10px;
       font-size: 0.9rem;
@@ -114,16 +127,17 @@
 <body>
   <header>
     <h1>BMI & Lifestyle Health Tracker</h1>
+    <button id="signup-toggle" onclick="toggleSignup()">👤 Signup (optional)</button>
   </header>
   <main>
-    <div id="login-card" class="card">
-      <h3>Welcome! Please enter your name & email</h3>
+    <div id="login-card" class="card hidden">
+      <h3>Enter your name & email</h3>
       <input type="text" id="userName" placeholder="Your Name" />
       <input type="email" id="userEmail" placeholder="Email (for local storage only)" />
       <button onclick="saveUser()">Continue</button>
     </div>
 
-    <div id="bmi-form" class="card hidden">
+    <div id="bmi-form" class="card">
       <label>Height (in cm)</label>
       <input type="number" id="height" placeholder="e.g. 170" />
       <label>Weight (in kg)</label>
@@ -131,44 +145,52 @@
       <button onclick="calculateBMI()">Calculate BMI</button>
     </div>
 
-    <div id="bmi-result" class="card hidden"></div>
-    <div id="bmi-chart" class="card hidden">
-      <h4>BMI Category Chart:</h4>
-      <div class="bar-wrapper">
-        <div class="bmi-bar">
-          <div class="uw" style="width:15%"></div>
-          <div class="n"  style="width:35%"></div>
-          <div class="ow" style="width:25%"></div>
-          <div class="ob" style="width:25%"></div>
+    <div id="report">
+      <div id="bmi-result" class="card hidden"></div>
+      <div id="bmi-chart" class="card hidden">
+        <h4>BMI Category Chart:</h4>
+        <div class="bar-wrapper">
+          <div class="bmi-bar">
+            <div class="uw" style="width:15%"></div>
+            <div class="n"  style="width:35%"></div>
+            <div class="ow" style="width:25%"></div>
+            <div class="ob" style="width:25%"></div>
+          </div>
+          <div id="marker" class="marker" style="left:0%"></div>
         </div>
-        <div id="marker" class="marker" style="left:0%"></div>
       </div>
-    </div>
 
-    <div id="mascot-box" class="card hidden">
-      <div class="mascot" id="mascot">🙂</div>
-      <p id="mascot-msg" style="text-align:center;"></p>
-    </div>
-
-    <div id="share-buttons" class="card hidden share-buttons">
-      <button onclick="shareBMI('whatsapp')">Share via WhatsApp</button>
-      <button onclick="shareBMI('telegram')">Share via Telegram</button>
-    </div>
-
-    <div id="test-suggestions" class="card hidden"></div>
-    <div id="disease-check" class="card hidden">
-      <p><strong>Do you have any of the following lifestyle diseases?</strong></p>
-      <div class="checkbox-group">
-        <label><input type="checkbox" value="Diabetes" /> Diabetes</label>
-        <label><input type="checkbox" value="Hypertension" /> Hypertension</label>
-        <label><input type="checkbox" value="Fatty Liver" /> Fatty Liver</label>
-        <label><input type="checkbox" value="Thyroid" /> Thyroid</label>
+      <div id="mascot-box" class="card hidden">
+        <div class="mascot" id="mascot">🙂</div>
+        <p id="mascot-msg" style="text-align:center;"></p>
       </div>
-      <p><strong>Are they under control?</strong></p>
-      <button onclick="showRecommendations()">I Need Help</button>
+
+      <div id="share-buttons" class="card hidden share-buttons">
+        <button onclick="shareBMI('whatsapp')">Share via WhatsApp</button>
+        <button onclick="shareBMI('telegram')">Share via Telegram</button>
+      </div>
+
+      <div id="export-buttons" class="card hidden export-buttons">
+        <button onclick="downloadPDF()">Export as PDF</button>
+        <button onclick="downloadImage()">Save as Image</button>
+      </div>
+
+      <div id="test-suggestions" class="card hidden"></div>
+      <div id="disease-check" class="card hidden">
+        <p><strong>Do you have any of the following lifestyle diseases?</strong></p>
+        <div class="checkbox-group">
+          <label><input type="checkbox" value="Diabetes" /> Diabetes</label>
+          <label><input type="checkbox" value="Hypertension" /> Hypertension</label>
+          <label><input type="checkbox" value="Fatty Liver" /> Fatty Liver</label>
+          <label><input type="checkbox" value="Thyroid" /> Thyroid</label>
+        </div>
+        <p><strong>Are they under control?</strong></p>
+        <button onclick="showRecommendations()">I Need Help</button>
+      </div>
+
+      <div id="recommendations" class="card hidden"></div>
     </div>
 
-    <div id="recommendations" class="card hidden"></div>
     <div id="history" class="card hidden">
       <h4>Your BMI History</h4>
       <table id="bmiTable"><tr><th>Date</th><th>BMI</th><th>Category</th></tr></table>
@@ -177,16 +199,16 @@
   </main>
 
   <footer>
-    Built by <a href="https://github.com/vxsaga" target="_blank">vxsaga</a> · Health Tracker
+    Built by <a href="https://github.com/vxsaga" target="_blank">vxsaga</a> · Free Health Tracker
   </footer>
 
   <script>
+    const loginCard = document.getElementById("login-card");
     let user = JSON.parse(localStorage.getItem("bmiUser")) || null;
-    if (user) {
-      document.getElementById("login-card").classList.add("hidden");
-      document.getElementById("bmi-form").classList.remove("hidden");
-      showHistory();
+    function toggleSignup() {
+      loginCard.classList.toggle("hidden");
     }
+    if (user) showHistory();
 
     function saveUser() {
       const name = document.getElementById("userName").value;
@@ -194,9 +216,7 @@
       if (!name || !email) return alert("Enter name and email");
       user = { name, email };
       localStorage.setItem("bmiUser", JSON.stringify(user));
-      document.getElementById("login-card").classList.add("hidden");
-      document.getElementById("bmi-form").classList.remove("hidden");
-      showHistory();
+      loginCard.classList.add("hidden");
     }
 
     function calculateBMI() {
@@ -219,6 +239,7 @@
       document.getElementById("mascot").innerText = mascot;
       document.getElementById("mascot-msg").innerText = msg;
       document.getElementById("share-buttons").classList.remove("hidden");
+      document.getElementById("export-buttons").classList.remove("hidden");
 
       saveBMIToHistory(bmi, category);
 
@@ -279,6 +300,25 @@
         localStorage.removeItem("bmiHistory");
         showHistory();
       }
+    }
+
+    async function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const element = document.getElementById("report");
+      const canvas = await html2canvas(element);
+      const imgData = canvas.toDataURL("image/png");
+      doc.addImage(imgData, "PNG", 10, 10, 190, 0);
+      doc.save("BMI_Report.pdf");
+    }
+
+    async function downloadImage() {
+      const element = document.getElementById("report");
+      const canvas = await html2canvas(element);
+      const link = document.createElement("a");
+      link.download = "BMI_Report.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
     }
   </script>
 </body>
