@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://vxsaga.github.io/BMI-Calculator-Advanced/sitemap.xml
