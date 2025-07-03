@@ -448,12 +448,13 @@
       document.getElementById("mascot-msg").innerText = msg;// Show WHO Chart & Marker
 document.getElementById("bmiChartSection").classList.remove("hidden");
 const marker = document.getElementById("bmiMarker");
+// Map BMI to X-axis: 10 to 40 BMI across 40 to 400 px
+const bmiValue = parseFloat(bmi); // from earlier calculation
+const chartX = Math.min(400, Math.max(40, 40 + ((bmiValue - 10) / 30) * 360));
 
-// X = weight scaled from 40–140kg across 380px
-const chartX = Math.min(420, Math.max(40, 40 + ((w - 40) / 100) * 380));
+// Keep Y fixed (or you can customize based on categories)
+const chartY = 200; // set a middle Y point
 
-// Y = height scaled from 140–200cm, inverted across 300px
-const chartY = Math.min(320, Math.max(20, 320 - ((h - 140) / 60) * 300));
 
 marker.setAttribute("cx", chartX);
 marker.setAttribute("cy", chartY);
