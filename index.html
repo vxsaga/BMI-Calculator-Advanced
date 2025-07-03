@@ -410,120 +410,129 @@
     }
 
     function calculateBMI() {
-      const h = parseFloat(document.getElementById("height").value);
-      const w = parseFloat(document.getElementById("weight").value);
-      if (!h || !w) return alert("Enter valid height and weight.");
-      const bmi = (w / ((h / 100) ** 2)).toFixed(1);
-      let category = "", mascot = "", msg = "", percent = 0;
+function calculateBMI() {
+  const h = parseFloat(document.getElementById("height").value);
+  const w = parseFloat(document.getElementById("weight").value);
+  if (!h || !w) return alert("Enter valid height and weight.");
 
-      if (bmi < 18.5) {
-        category = "Underweight"; mascot = "😟";
-        msg = "You're underweight. Eat nutrient-rich foods & consider supplements.";
-        percent = 7;
-      } else if (bmi < 24.9) {
-        category = "Normal"; mascot = "😃";
-        msg = "Great! You're maintaining a healthy weight.";
-        percent = 25;
-      } else if (bmi < 29.9) {
-        category = "Overweight"; mascot = "😐";
-        msg = "Try increasing physical activity and reduce junk food.";
-        percent = 60;
-      } else {
-        category = "Obese"; mascot = "😟";
-        msg = "Your BMI is high. Please start taking action for your health.";
-        percent = 87;
-      }
+  const bmi = (w / ((h / 100) ** 2)).toFixed(1);
+  let category = "", mascot = "", msg = "", percent = 0;
 
-      document.getElementById("bmi-result").classList.remove("hidden");
-      document.getElementById("bmi-result").innerHTML = `
-        <h3>Your BMI is ${bmi}</h3>
-        <p>Category: <strong>${category}</strong></p>
-      `;
+  if (bmi < 18.5) {
+    category = "Underweight"; mascot = "😟";
+    msg = "You're underweight. Eat nutrient-rich foods & consider supplements.";
+    percent = 7;
+  } else if (bmi < 24.9) {
+    category = "Normal"; mascot = "😃";
+    msg = "Great! You're maintaining a healthy weight.";
+    percent = 25;
+  } else if (bmi < 29.9) {
+    category = "Overweight"; mascot = "😐";
+    msg = "Try increasing physical activity and reduce junk food.";
+    percent = 60;
+  } else {
+    category = "Obese"; mascot = "😟";
+    msg = "Your BMI is high. Please start taking action for your health.";
+    percent = 87;
+  }
 
-      document.getElementById("bmi-chart").classList.remove("hidden");
-      document.getElementById("marker").style.left = `${percent}%`;
+  // Update Result
+  document.getElementById("bmi-result").classList.remove("hidden");
+  document.getElementById("bmi-result").innerHTML = `
+    <h3>Your BMI is ${bmi}</h3>
+    <p>Category: <strong>${category}</strong></p>
+  `;
 
-      document.getElementById("mascot-box").classList.remove("hidden");
-      document.getElementById("mascot").innerText = mascot;
-      document.getElementById("mascot-msg").innerText = msg;// Show WHO Chart & Marker
-document.getElementById("bmiChartSection").classList.remove("hidden");
-const marker = document.getElementById("bmiMarker");
-const chart = document.getElementById("bmiChart");
-const bmiValue = parseFloat(bmi);
+  // Update Bar Marker
+  document.getElementById("bmi-chart").classList.remove("hidden");
+  document.getElementById("marker").style.left = `${percent}%`;
 
-// X-axis position for BMI (from 10 to 40 mapped to 40px to 400px)
-const chartX = Math.min(400, Math.max(40, 40 + ((bmiValue - 10) / 30) * 360));
-const chartY = 185;
+  // Update Mascot
+  document.getElementById("mascot-box").classList.remove("hidden");
+  document.getElementById("mascot").innerText = mascot;
+  document.getElementById("mascot-msg").innerText = msg;
 
-marker.setAttribute("cx", chartX);
-marker.setAttribute("cy", chartY);
-marker.setAttribute("visibility", "visible");
+  // Show WHO Chart (SVG)
+  document.getElementById("bmiChartSection").classList.remove("hidden");
+  const chart = document.getElementById("bmiChart");
+  const marker = document.getElementById("bmiMarker");
 
-// Clean previous labels if any
-document.querySelectorAll(".xLabel, .yLabel").forEach(el => el.remove());
+  const bmiValue = parseFloat(bmi);
+  const chartX = Math.min(400, Math.max(40, 40 + ((bmiValue - 10) / 30) * 360));
+  const chartY = 185;
 
-// Add X-axis labels for BMI values
-for (let i = 10; i <= 40; i += 5) {
-  const x = 40 + ((i - 10) / 30) * 360;
-  const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
-  label.setAttribute("x", x);
-  label.setAttribute("y", 315);
-  label.setAttribute("text-anchor", "middle");
-  label.setAttribute("font-size", "12");
-  label.setAttribute("fill", "#333");
-  label.setAttribute("class", "xLabel");
-  label.textContent = i;
-  chart.appendChild(label);
+  marker.setAttribute("cx", chartX);
+  marker.setAttribute("cy", chartY);
+  marker.setAttribute("visibility", "visible");
+  marker.setAttribute("stroke", "black");
+  marker.setAttribute("stroke-width", "1.5");
+
+  // Clean previous labels
+  document.querySelectorAll(".xLabel, .yLabel").forEach(el => el.remove());
+
+  // Add X-axis labels
+  for (let i = 10; i <= 40; i += 5) {
+    const x = 40 + ((i - 10) / 30) * 360;
+    const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    label.setAttribute("x", x);
+    label.setAttribute("y", 315);
+    label.setAttribute("text-anchor", "middle");
+    label.setAttribute("font-size", "12");
+    label.setAttribute("fill", "#333");
+    label.setAttribute("class", "xLabel");
+    label.textContent = i;
+    chart.appendChild(label);
+  }
+
+  // Add Y-axis label
+  const yLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+  yLabel.setAttribute("x", 5);
+  yLabel.setAttribute("y", 190);
+  yLabel.setAttribute("text-anchor", "start");
+  yLabel.setAttribute("font-size", "14");
+  yLabel.setAttribute("fill", "#333");
+  yLabel.setAttribute("class", "yLabel");
+  yLabel.setAttribute("transform", "rotate(-90 5,190)");
+  yLabel.textContent = "BMI Category";
+  chart.appendChild(yLabel);
+
+  // Show Share/Export Options
+  document.getElementById("share-buttons").classList.remove("hidden");
+  document.getElementById("export-buttons").classList.remove("hidden");
+
+  // Save BMI to History
+  saveBMIToHistory(bmi, category);
+
+  // Show Test Suggestions
+  const testArea = document.getElementById("test-suggestions");
+  const diseaseCard = document.getElementById("disease-check");
+  testArea.classList.remove("hidden");
+
+  if (bmi > 24.9) {
+    testArea.innerHTML = `
+      <h4>Suggested Blood Tests:</h4>
+      <ul>
+        <li>Fasting Glucose, HbA1c</li>
+        <li>Lipid Profile (Cholesterol)</li>
+        <li>Liver Function Test (LFT)</li>
+        <li>Thyroid Function (TSH, T3, T4)</li>
+      </ul>`;
+    diseaseCard.classList.remove("hidden");
+  } else if (bmi < 18.5) {
+    testArea.innerHTML = `
+      <h4>Suggested Blood Tests:</h4>
+      <ul>
+        <li>Iron, Vitamin B12/D</li>
+        <li>Thyroid Profile</li>
+        <li>CBC, LFT, KFT</li>
+      </ul>
+      <p>Consider increasing calorie intake with healthy fats and protein.</p>`;
+    diseaseCard.classList.add("hidden");
+  } else {
+    testArea.classList.add("hidden");
+    diseaseCard.classList.add("hidden");
+  }
 }
-
-// Add Y-axis label
-const yLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
-yLabel.setAttribute("x", 5);
-yLabel.setAttribute("y", 190);
-yLabel.setAttribute("text-anchor", "start");
-yLabel.setAttribute("font-size", "14");
-yLabel.setAttribute("fill", "#333");
-yLabel.setAttribute("class", "yLabel");
-yLabel.setAttribute("transform", "rotate(-90 5,190)");
-yLabel.textContent = "BMI Category";
-chart.appendChild(yLabel);
-
-
-
-      document.getElementById("share-buttons").classList.remove("hidden");
-      document.getElementById("export-buttons").classList.remove("hidden");
-
-      saveBMIToHistory(bmi, category);
-
-      const testArea = document.getElementById("test-suggestions");
-      const diseaseCard = document.getElementById("disease-check");
-      testArea.classList.remove("hidden");
-
-      if (bmi > 24.9) {
-        testArea.innerHTML = `
-          <h4>Suggested Blood Tests:</h4>
-          <ul>
-            <li>Fasting Glucose, HbA1c</li>
-            <li>Lipid Profile (Cholesterol)</li>
-            <li>Liver Function Test (LFT)</li>
-            <li>Thyroid Function (TSH, T3, T4)</li>
-          </ul>`;
-        diseaseCard.classList.remove("hidden");
-      } else if (bmi < 18.5) {
-        testArea.innerHTML = `
-          <h4>Suggested Blood Tests:</h4>
-          <ul>
-            <li>Iron, Vitamin B12/D</li>
-            <li>Thyroid Profile</li>
-            <li>CBC, LFT, KFT</li>
-          </ul>
-          <p>Consider increasing calorie intake with healthy fats and protein.</p>`;
-        diseaseCard.classList.add("hidden");
-      } else {
-        testArea.classList.add("hidden");
-        diseaseCard.classList.add("hidden");
-      }
-    }
 
     function shareBMI(platform) {
       const result = document.getElementById("bmi-result").innerText;
