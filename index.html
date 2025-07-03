@@ -449,12 +449,16 @@
 document.getElementById("bmiChartSection").classList.remove("hidden");
 const marker = document.getElementById("bmiMarker");
 
-// Convert height to meters and find coordinates (basic simulation)
-const chartX = Math.min(400, Math.max(40, 40 + (w - 40) * 2));
-const chartY = 300 - (h - 140); // vertical scaling (approximate)
+// X = weight scaled from 40–140kg across 380px
+const chartX = Math.min(420, Math.max(40, 40 + ((w - 40) / 100) * 380));
+
+// Y = height scaled from 140–200cm, inverted across 300px
+const chartY = Math.min(320, Math.max(20, 320 - ((h - 140) / 60) * 300));
 
 marker.setAttribute("cx", chartX);
 marker.setAttribute("cy", chartY);
+marker.setAttribute("visibility", "visible");
+
 marker.setAttribute("visibility", "visible");
 
 
