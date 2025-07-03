@@ -448,19 +448,46 @@
       document.getElementById("mascot-msg").innerText = msg;// Show WHO Chart & Marker
 document.getElementById("bmiChartSection").classList.remove("hidden");
 const marker = document.getElementById("bmiMarker");
-// Map BMI to X-axis: 10 to 40 BMI across 40 to 400 px
-const bmiValue = parseFloat(bmi); // from earlier calculation
+const chart = document.getElementById("bmiChart");
+const bmiValue = parseFloat(bmi);
+
+// X-axis position for BMI (from 10 to 40 mapped to 40px to 400px)
 const chartX = Math.min(400, Math.max(40, 40 + ((bmiValue - 10) / 30) * 360));
-
-// Keep Y fixed (or you can customize based on categories)
-const chartY = 200; // set a middle Y point
-
+const chartY = 185;
 
 marker.setAttribute("cx", chartX);
 marker.setAttribute("cy", chartY);
 marker.setAttribute("visibility", "visible");
 
-marker.setAttribute("visibility", "visible");
+// Clean previous labels if any
+document.querySelectorAll(".xLabel, .yLabel").forEach(el => el.remove());
+
+// Add X-axis labels for BMI values
+for (let i = 10; i <= 40; i += 5) {
+  const x = 40 + ((i - 10) / 30) * 360;
+  const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+  label.setAttribute("x", x);
+  label.setAttribute("y", 315);
+  label.setAttribute("text-anchor", "middle");
+  label.setAttribute("font-size", "12");
+  label.setAttribute("fill", "#333");
+  label.setAttribute("class", "xLabel");
+  label.textContent = i;
+  chart.appendChild(label);
+}
+
+// Add Y-axis label
+const yLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+yLabel.setAttribute("x", 5);
+yLabel.setAttribute("y", 190);
+yLabel.setAttribute("text-anchor", "start");
+yLabel.setAttribute("font-size", "14");
+yLabel.setAttribute("fill", "#333");
+yLabel.setAttribute("class", "yLabel");
+yLabel.setAttribute("transform", "rotate(-90 5,190)");
+yLabel.textContent = "BMI Category";
+chart.appendChild(yLabel);
+
 
 
       document.getElementById("share-buttons").classList.remove("hidden");
